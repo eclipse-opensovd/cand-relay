@@ -1,0 +1,65 @@
+# SPDX-FileCopyrightText: 2026 Copyright (c) Contributors to cand-relay
+#
+# See the NOTICE file(s) distributed with this work for additional
+# information regarding copyright ownership.
+#
+# This program and the accompanying materials are made available under the
+# terms of the Apache License Version 2.0 which is available at
+# https://www.apache.org/licenses/LICENSE-2.0
+#
+# SPDX-License-Identifier: Apache-2.0
+
+[workspace.package]
+edition = "2021"
+license = "Apache-2.0"
+homepage = "https://github.com/floroks/cand-relay"
+version = "0.1.0"
+
+[workspace]
+resolver = "2"
+members = [
+  "cand-relay-core",
+  "cand-relay-backend-vector",
+  "cand-relay-backend-socketcan",
+  "cand-relay-backend-mock",
+  "cand-relay",
+]
+
+[workspace.lints.clippy]
+# enable pedantic
+pedantic = { level = "deny", priority = -1 }
+## exclude some too pedantic lints for now
+similar_names = { level = "allow" }
+
+# additional lints
+clone_on_ref_ptr = { level = "deny" }
+indexing_slicing = { level = "deny" }
+unwrap_used = { level = "deny" }
+arithmetic_side_effects = { level = "deny" }
+separated_literal_suffix = { level = "deny" }
+string_slice = { level = "deny" }
+
+[workspace.lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(nightly)'] }
+
+[workspace.dependencies]
+cand-relay-core = { path = "cand-relay-core" }
+cand-relay-backend-vector = { path = "cand-relay-backend-vector" }
+cand-relay-backend-socketcan = { path = "cand-relay-backend-socketcan" }
+cand-relay-backend-mock = { path = "cand-relay-backend-mock" }
+
+async-trait = "0.1.89"
+thiserror = "2.0.17"
+tokio = { version = "1.48.0", default-features = false }
+tokio-util = { version = "0.7.3", default-features = false }
+tracing = "0.1.41"
+tracing-subscriber = { version = "0.3.20", default-features = false }
+serde = "1.0"
+toml = "0.9.8"
+clap = "4.5"
+hex = "0.4.3"
+bytes = "1"
+anyhow = "1"
+
+[profile.release]
+opt-level = 3

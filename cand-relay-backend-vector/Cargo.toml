@@ -1,0 +1,44 @@
+# SPDX-FileCopyrightText: 2026 Copyright (c) Contributors to cand-relay
+#
+# See the NOTICE file(s) distributed with this work for additional
+# information regarding copyright ownership.
+#
+# This program and the accompanying materials are made available under the
+# terms of the Apache License Version 2.0 which is available at
+# https://www.apache.org/licenses/LICENSE-2.0
+#
+# SPDX-License-Identifier: Apache-2.0
+
+[package]
+name = "cand-relay-backend-vector"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+homepage.workspace = true
+publish = false
+description = "Vector XL-API CAN backend for cand-relay (works across the whole Vector XL-API hardware line, e.g. VN15xx/VN16xx/VN56xx/VN76xx/...)"
+
+[dependencies]
+cand-relay-core.workspace = true
+async-trait.workspace = true
+tokio = { workspace = true, features = ["rt", "sync"] }
+tracing.workspace = true
+thiserror.workspace = true
+
+[build-dependencies]
+# Only invoked when a vendor SDK header is supplied via VXLAPI_H; see build.rs.
+bindgen = { version = "0.71", optional = true }
+
+[features]
+default = []
+# Enables the Windows vxlapi64.dll FFI backend (statically linked against
+# the import lib supplied via VXLAPI_LIB_DIR). Only meaningful/compilable
+# when targeting Windows.
+windows = ["dep:bindgen"]
+# Enables the Linux XL-API shared-library FFI backend. Only meaningful when
+# a Linux XL-API driver package/SDK is installed; not required for the
+# Windows-hosted bridge use case this crate was originally built for.
+linux = ["dep:bindgen"]
+
+[lints]
+workspace = true

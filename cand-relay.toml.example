@@ -1,0 +1,71 @@
+# SPDX-FileCopyrightText: 2026 Copyright (c) Contributors to cand-relay
+#
+# See the NOTICE file(s) distributed with this work for additional
+# information regarding copyright ownership.
+#
+# This program and the accompanying materials are made available under the
+# terms of the Apache License Version 2.0 which is available at
+# https://www.apache.org/licenses/LICENSE-2.0
+#
+# SPDX-License-Identifier: Apache-2.0
+
+[server]
+listen = "0.0.0.0:29536"
+
+[[bus]]
+name = "can0"
+backend = "vector"
+bitrate = 500000
+# Vector XL-API channel, addressed by either its channel index or its exact
+# name. Run `cand-relay list-devices --backend vector` to see every
+# channel this machine's Vector driver reports (works without any Vector
+# Hardware Manager setup) and pick one with `canCap=true` -- use either the
+# `channelIndex` (e.g. "2") or the `name` (e.g. "VN5610A Channel 3") shown
+# there.
+selector = "0"
+# Optional nominal (arbitration phase) sample point in percent.
+# sample_point = 80
+
+# CAN FD (currently `vector` backend only). If present, the channel is
+# opened in CAN FD mode with the timing below; received FD frames (up to 64
+# bytes) are relayed as `< fdframe >` messages, client `< fdsend >` frames are
+# sent as CAN FD with the requested flags, and classic `< send >` frames are
+# transmitted per `tx_mode`:
+#   "fd_brs"  (default) every frame as CAN FD with bit rate switch
+#   "fd"      every frame as CAN FD without bit rate switch
+#   "classic" <= 8 byte frames as classic CAN, longer ones as CAN FD
+# The channel must not already be owned by another application (DTS Monaco,
+# CANoe, ...), otherwise these settings can't be applied.
+#
+# [bus.fd]
+# data_bitrate = 2000000
+# data_sample_point = 75
+# iso = true
+# tx_mode = "fd_brs"
+# Some ECUs default to sleep and won't respond on the CAN bus at all until
+# woken up by a dedicated physical signal. Vector devices like the
+# VN5610A/VN5620 expose this as a separate DAIO "Activation Line"/"WakeUp
+# Line" channel (canCap=false in `list-devices`, distinct from the actual
+# CAN channel above) -- uncomment and adjust to pulse it once at startup
+# and, if `interval_secs` is non-zero, repeatedly afterwards:
+#
+# [bus.wakeup]
+# selector = "VN5610A Channel 5"
+# port_mask = 1       # XL_DAIO_PORT_MASK_DIGITAL_D0; check your device's manual
+# pulse_ms = 300       # how long to hold the line high
+# interval_secs = 5    # 0 (default) = pulse once at startup only
+
+# Additional buses (e.g. a second Vector channel, or a different backend)
+# are just more [[bus]] entries:
+#
+# [[bus]]
+# name = "can1"
+# backend = "vector"
+# bitrate = 500000
+# selector = "1"
+#
+# [[bus]]
+# name = "vcan0"
+# backend = "socketcan"
+# bitrate = 500000
+# selector = "vcan0"

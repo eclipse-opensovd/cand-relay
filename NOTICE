@@ -1,0 +1,38 @@
+cand-relay
+==========
+
+Copyright (c) 2026 Contributors to cand-relay
+
+This product is licensed under the Apache License, Version 2.0.
+See LICENSES/Apache-2.0.txt.
+
+Third-party content
+-------------------
+
+This repository does not contain any third-party source code. Dependencies
+are pulled in via Cargo and are licensed under their respective terms
+(MIT, Apache-2.0, BSD-3-Clause, Unlicense, Unicode-3.0); see Cargo.lock and
+each crate's metadata.
+
+Vector XL Driver Library
+------------------------
+
+The optional `cand-relay-backend-vector` crate interoperates with Vector
+Informatik GmbH's XL Driver Library (vxlapi.h, vxlapi64.dll / libxlapi.so).
+None of the XL Driver Library is included in this repository; it must be
+obtained from Vector and is subject to Vector's license terms. FFI bindings
+are generated at build time from the user's local copy of vxlapi.h.
+
+socketcand
+----------
+
+cand-relay implements the socketcand network protocol for interoperability.
+It does not contain code from the socketcand project.
+
+Trademarks
+----------
+
+"Vector", "XL Driver Library" and "XL-API" are trademarks of Vector
+Informatik GmbH. They are used solely to identify the hardware and API this
+project interoperates with. This project is not affiliated with, sponsored
+by, or endorsed by Vector Informatik GmbH.
