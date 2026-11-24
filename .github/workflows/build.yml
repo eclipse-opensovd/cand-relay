@@ -1,0 +1,89 @@
+# SPDX-FileCopyrightText: 2026 Copyright (c) Contributors to cand-relay
+#
+# See the NOTICE file(s) distributed with this work for additional
+# information regarding copyright ownership.
+#
+# This program and the accompanying materials are made available under the
+# terms of the Apache License Version 2.0 which is available at
+# https://www.apache.org/licenses/LICENSE-2.0
+#
+# SPDX-License-Identifier: Apache-2.0
+name: Rust CI
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+jobs:
+  versions:
+    uses: ./.github/workflows/tool-versions.yml
+  build_and_test:
+    needs: versions
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          submodules: false
+      - name: Install Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: ${{ needs.versions.outputs.stable }}
+          components: clippy, rustfmt
+      - name: Install tools
+        run: make install-tools
+      - name: Build
+        run: make build ARGS=--verbose
+      - name: Check licenses
+        run: make deny ARGS=licenses
+      - name: Check allowed sources
+        run: make deny ARGS=sources
+      - name: Check banned practises
+        run: make deny ARGS=bans
+      - name: Test
+        run: make test ARGS="-- --show-output"
+  build_all_features:
+    needs: versions
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          submodules: false
+      - name: Install Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: ${{ needs.versions.outputs.stable }}
+      - name: Build with all SDK-free backends
+        run: make build-all-features ARGS=--verbose
+      - name: Test with all SDK-free backends
+        run: make test-all-features ARGS="-- --show-output"
+  windows_stub_check:
+    # Vector's XL Driver Library SDK cannot be fetched in CI: Vector's
+    # license prohibits redistributing the DLL without a separate written
+    # agreement, and the download itself is gated behind an interactive
+    # lead-capture form (no stable/scriptable URL). See docs/vector-sdk.md for
+    # details. This job therefore only validates that cand-relay-backend-vector
+    # compiles on Windows *without* the `vector-windows` feature (i.e. the
+    # BackendError::Unavailable stub) -- a full build against the real SDK
+    # is a manual, local step for whoever has it installed alongside their
+    # Vector hardware driver.
+    needs: versions
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          submodules: false
+      - name: Install Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: ${{ needs.versions.outputs.stable }}
+      - name: Build
+        run: cargo +${{ needs.versions.outputs.stable }} build --locked --workspace
